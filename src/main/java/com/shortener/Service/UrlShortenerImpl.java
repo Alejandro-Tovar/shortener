@@ -1,6 +1,7 @@
 package com.shortener.Service;
 
-import com.shortener.Entity.ShortenRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.shortener.Entity.ShortenResponse;
 import com.shortener.Entity.UrlMapping;
 import com.shortener.Repository.UrlRepository;
@@ -13,14 +14,23 @@ import java.util.List;
 import java.util.Optional;
 
 
+
 @Service
 public class UrlShortenerImpl implements UrlShortener {
+
+    private static final Logger logger = LoggerFactory.getLogger(UrlShortenerImpl.class);
+
+    final long TTL_SECONDS = 86400L;
 
     @Autowired
     UrlRepository urlRepository;
 
+    @Autowired
+    RedisCache redisCache;
+
     @Override
     public ShortenResponse shortenUrl(String url)  {
+        logger.debug("Shortening URL: {}", url);
         if (!ShortenerUtilities.isValidURL(url)) {
             throw new InvalidUrlException("Invalid Url");
         }
@@ -38,16 +48,26 @@ public class UrlShortenerImpl implements UrlShortener {
     }
 
     private String getFullUrl(String code) {
-        Optional<UrlMapping> urlMappings = urlRepository.findByShortenedUrl(code);
-        if (code == null || code.isEmpty() || urlMappings.isEmpty()) {
+        logger.debug("Attempting to retrieve URL: {}", code);
+        if (code == null || code.isEmpty()) {
             throw new InvalidUrlException("Invalid Shortened Url");
         }
+        String cachedUrl = redisCache.get(code);
+        if (cachedUrl != null) {
+            return cachedUrl;
+        }
+        Optional<UrlMapping> urlMappings = urlRepository.findByShortenedUrl(code);
+        String queryUrl = urlMappings.orElseThrow(() -> new InvalidUrlException("Invalid Shortened Url")).getUrl();
+        redisCache.save(code, queryUrl, TTL_SECONDS);
 
-        return urlMappings.get().getUrl();
+        return queryUrl;
     }
 
     private String saveShortenedUrl(String url, String shortenedUrl) {
+        logger.debug("Attempting to save URL: {}, with code {}", url, shortenedUrl);
         urlRepository.save(new UrlMapping(url, shortenedUrl));
+        redisCache.save(shortenedUrl, url, TTL_SECONDS);
+
         return shortenedUrl;
     }
 

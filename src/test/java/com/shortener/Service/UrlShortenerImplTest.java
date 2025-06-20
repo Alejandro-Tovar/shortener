@@ -21,6 +21,9 @@ class UrlShortenerImplTest {
     @Mock
     private UrlRepository urlRepository;
 
+    @Mock
+    private RedisCacheImpl redisCache;
+
     @InjectMocks
     private UrlShortenerImpl urlShortener;
 
