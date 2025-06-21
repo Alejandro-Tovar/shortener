@@ -1,4 +1,4 @@
-package com.shortener.Entity;
+package com.shortener.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,8 +20,10 @@ public class UrlMapping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     int id;
+
     @Getter
     String url;
+
     @Getter
     String shortenedUrl;
 }

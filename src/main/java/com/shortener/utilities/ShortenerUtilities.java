@@ -1,4 +1,6 @@
-package com.shortener.Utilities;
+package com.shortener.utilities;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -27,4 +29,11 @@ public class ShortenerUtilities {
         }
     }
 
+    public static String getClientIp(HttpServletRequest request) {
+        String header = request.getHeader("X-Forwarded-For");
+        if (header != null && !header.isEmpty()) {
+            return header.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
 }

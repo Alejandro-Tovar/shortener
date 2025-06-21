@@ -1,7 +1,6 @@
-package com.shortener.Repository;
+package com.shortener.repository;
 
-import com.shortener.Entity.UrlMapping;
-import org.springframework.data.domain.Limit;
+import com.shortener.entity.UrlMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

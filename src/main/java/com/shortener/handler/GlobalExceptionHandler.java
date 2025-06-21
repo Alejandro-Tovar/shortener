@@ -1,4 +1,4 @@
-package com.shortener.Handler;
+package com.shortener.handler;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

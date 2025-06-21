@@ -1,4 +1,4 @@
-package com.shortener.Entity;
+package com.shortener.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

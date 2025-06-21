@@ -1,8 +1,8 @@
-package com.shortener.Service;
+package com.shortener.service;
 
-import com.shortener.Entity.UrlMapping;
-import com.shortener.Repository.UrlRepository;
-import com.shortener.Entity.ShortenResponse;
+import com.shortener.entity.UrlMapping;
+import com.shortener.repository.UrlRepository;
+import com.shortener.entity.ShortenResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

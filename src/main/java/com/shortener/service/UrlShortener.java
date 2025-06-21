@@ -1,6 +1,6 @@
-package com.shortener.Service;
+package com.shortener.service;
 
-import com.shortener.Entity.ShortenResponse;
+import com.shortener.entity.ShortenResponse;
 
 public interface UrlShortener {
 

@@ -1,7 +1,7 @@
-package com.shortener.IntegrationTests;
+package com.shortener.e2etests;
 
-import com.shortener.Entity.ShortenRequest;
-import com.shortener.Entity.ShortenResponse;
+import com.shortener.entity.ShortenRequest;
+import com.shortener.entity.ShortenResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;

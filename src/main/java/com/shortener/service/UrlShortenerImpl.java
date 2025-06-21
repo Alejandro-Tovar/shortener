@@ -1,19 +1,18 @@
-package com.shortener.Service;
+package com.shortener.service;
 
+import com.shortener.repository.UrlClickRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.shortener.Entity.ShortenResponse;
-import com.shortener.Entity.UrlMapping;
-import com.shortener.Repository.UrlRepository;
-import com.shortener.Utilities.ShortenerUtilities;
+import com.shortener.entity.ShortenResponse;
+import com.shortener.entity.UrlMapping;
+import com.shortener.repository.UrlRepository;
+import com.shortener.utilities.ShortenerUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.InvalidUrlException;
 
 import java.util.List;
 import java.util.Optional;
-
-
 
 @Service
 public class UrlShortenerImpl implements UrlShortener {
@@ -22,11 +21,18 @@ public class UrlShortenerImpl implements UrlShortener {
 
     final long TTL_SECONDS = 86400L;
 
-    @Autowired
-    UrlRepository urlRepository;
+
+    private final UrlRepository urlRepository;
+
+    private final RedisCache redisCache;
 
     @Autowired
-    RedisCache redisCache;
+    public UrlShortenerImpl(UrlRepository urlRepository,
+                            RedisCache redisCache,
+                            UrlClickRepository urlClickRepository) {
+        this.urlRepository = urlRepository;
+        this.redisCache = redisCache;
+    }
 
     @Override
     public ShortenResponse shortenUrl(String url)  {
@@ -58,7 +64,7 @@ public class UrlShortenerImpl implements UrlShortener {
         }
         Optional<UrlMapping> urlMappings = urlRepository.findByShortenedUrl(code);
         String queryUrl = urlMappings.orElseThrow(() -> new InvalidUrlException("Invalid Shortened Url")).getUrl();
-        redisCache.save(code, queryUrl, TTL_SECONDS);
+        redisCache.saveShortenedUrl(code, queryUrl, TTL_SECONDS);
 
         return queryUrl;
     }
@@ -66,7 +72,7 @@ public class UrlShortenerImpl implements UrlShortener {
     private String saveShortenedUrl(String url, String shortenedUrl) {
         logger.debug("Attempting to save URL: {}, with code {}", url, shortenedUrl);
         urlRepository.save(new UrlMapping(url, shortenedUrl));
-        redisCache.save(shortenedUrl, url, TTL_SECONDS);
+        redisCache.saveShortenedUrl(shortenedUrl, url, TTL_SECONDS);
 
         return shortenedUrl;
     }
