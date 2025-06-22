@@ -1,6 +1,6 @@
 package com.shortener.service;
 
-import com.shortener.repository.UrlClickRepository;
+import com.shortener.repository.AnalyticsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.shortener.entity.ShortenResponse;
@@ -21,7 +21,6 @@ public class UrlShortenerImpl implements UrlShortener {
 
     final long TTL_SECONDS = 86400L;
 
-
     private final UrlRepository urlRepository;
 
     private final RedisCache redisCache;
@@ -29,7 +28,7 @@ public class UrlShortenerImpl implements UrlShortener {
     @Autowired
     public UrlShortenerImpl(UrlRepository urlRepository,
                             RedisCache redisCache,
-                            UrlClickRepository urlClickRepository) {
+                            AnalyticsRepository analyticsRepository) {
         this.urlRepository = urlRepository;
         this.redisCache = redisCache;
     }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UrlRepository extends JpaRepository<UrlMapping, Long> {
+
     List<UrlMapping> findByUrl(String url);
 
     Optional<UrlMapping> findByShortenedUrl(String shortenedUrl);

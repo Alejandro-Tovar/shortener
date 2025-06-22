@@ -13,7 +13,7 @@ with caching strategies, and Dockerized deployment.
 
 ## Tech Stack
 
-- Java 21
+- Java 17
 - Spring Boot
 - Redis
 - Docker / Docker Compose
