@@ -1,6 +1,5 @@
 package com.shortener.service;
 
-import com.shortener.repository.AnalyticsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.shortener.entity.ShortenResponse;
@@ -18,17 +17,14 @@ import java.util.Optional;
 public class UrlShortenerImpl implements UrlShortener {
 
     private static final Logger logger = LoggerFactory.getLogger(UrlShortenerImpl.class);
-
-    final long TTL_SECONDS = 86400L;
+    private static final long TTL_SECONDS = 86400L;
 
     private final UrlRepository urlRepository;
-
     private final RedisCache redisCache;
 
     @Autowired
     public UrlShortenerImpl(UrlRepository urlRepository,
-                            RedisCache redisCache,
-                            AnalyticsRepository analyticsRepository) {
+                            RedisCache redisCache) {
         this.urlRepository = urlRepository;
         this.redisCache = redisCache;
     }
@@ -43,7 +39,6 @@ public class UrlShortenerImpl implements UrlShortener {
         if (shortenedUrl == null) {
             shortenedUrl = saveShortenedUrl(url, ShortenerUtilities.base62generator());
         }
-
         return new ShortenResponse(shortenedUrl);
     }
 
@@ -64,7 +59,6 @@ public class UrlShortenerImpl implements UrlShortener {
         Optional<UrlMapping> urlMappings = urlRepository.findByShortenedUrl(code);
         String queryUrl = urlMappings.orElseThrow(() -> new InvalidUrlException("Invalid Shortened Url")).getUrl();
         redisCache.saveShortenedUrl(code, queryUrl, TTL_SECONDS);
-
         return queryUrl;
     }
 
@@ -72,7 +66,6 @@ public class UrlShortenerImpl implements UrlShortener {
         logger.debug("Attempting to save URL: {}, with code {}", url, shortenedUrl);
         urlRepository.save(new UrlMapping(url, shortenedUrl));
         redisCache.saveShortenedUrl(shortenedUrl, url, TTL_SECONDS);
-
         return shortenedUrl;
     }
 
@@ -81,7 +74,6 @@ public class UrlShortenerImpl implements UrlShortener {
         if (urlMappings == null || urlMappings.isEmpty()) {
             return Optional.empty();
         }
-
         return Optional.ofNullable(urlMappings.get(0).getShortenedUrl());
     }
 }

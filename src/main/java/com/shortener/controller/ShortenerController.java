@@ -1,13 +1,14 @@
 package com.shortener.controller;
 
+import com.shortener.exception.RateLimitExceededException;
 import com.shortener.service.AnalyticsTracker;
+import com.shortener.service.RateLimiter;
 import com.shortener.service.UrlShortener;
 import com.shortener.entity.ShortenRequest;
 import com.shortener.entity.ShortenResponse;
 import com.shortener.utilities.ShortenerUtilities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,11 +25,15 @@ public class ShortenerController {
 
     private final AnalyticsTracker analyticsTracker;
 
+    private final RateLimiter rateLimiter;
+
     @Autowired
     public ShortenerController(UrlShortener urlShortener,
-                               AnalyticsTracker analyticsTracker) {
+                               AnalyticsTracker analyticsTracker,
+                               RateLimiter rateLimiter) {
         this.urlShortener = urlShortener;
         this.analyticsTracker = analyticsTracker;
+        this.rateLimiter = rateLimiter;
     }
 
     @Operation(summary = "Generates a shortened code for a valid URL")
@@ -37,7 +42,10 @@ public class ShortenerController {
             @ApiResponse(responseCode = "400", description = "Invalid request payload")
     })
     @PostMapping("/shorten")
-    public ResponseEntity<ShortenResponse> shortener(@RequestBody ShortenRequest url) {
+    public ResponseEntity<ShortenResponse> shortener(@RequestBody ShortenRequest url, HttpServletRequest request) {
+        if (rateLimiter.isRateLimitedExceededByIp(ShortenerUtilities.getClientIp(request))) {
+            throw new RateLimitExceededException("Too many requests from this IP");
+        }
         return new ResponseEntity<>(urlShortener.shortenUrl(url.getUrl()), HttpStatus.OK);
     }
 
@@ -48,6 +56,9 @@ public class ShortenerController {
     })
     @GetMapping("/s/{code}")
     public RedirectView redirectToFullUrl(@PathVariable String code, HttpServletRequest request) {
+        if (rateLimiter.isRateLimitedExceededByCode(code)) {
+            throw new RateLimitExceededException("Too many requests for this shortened URL");
+        }
         analyticsTracker.trackClicks(code, ShortenerUtilities.getClientIp(request));
         return new RedirectView(urlShortener.redirectToUrl(code));
     }

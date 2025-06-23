@@ -12,9 +12,7 @@ import java.time.Duration;
 public class RedisCacheImpl implements RedisCache {
 
     private static final Logger log = LoggerFactory.getLogger(RedisCacheImpl.class);
-
     private static final String SHORTENED_URL_TAG = "short:";
-
     private static final String UNIQUE_CLICKS_TAG = "clicks:unique:";
 
     private final RedisTemplate<String, String> redisTemplate;
